@@ -116,7 +116,7 @@ export default function GuideScreen() {
             { color: isDarkMode ? "#F1F5F9" : "#1E293B" },
           ]}
         >
-          Trumpet Fingering Guide 🎺
+          Trumpet Finger Placement and Notes 🎺
         </Text>
         <Text
           style={[

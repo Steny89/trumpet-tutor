@@ -120,7 +120,7 @@ export default function ExploreScreen() {
                 { color: isDarkMode ? "#F1F5F9" : "#1E293B" },
               ]}
             >
-              Fingering Guide
+              Finger placement and notes
             </Text>
             <Text
               style={[

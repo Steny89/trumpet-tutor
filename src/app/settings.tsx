@@ -1,6 +1,9 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
+import Constants from "expo-constants";
+import * as Updates from "expo-updates";
 import { useState } from "react";
 import {
+  Modal,
   StyleSheet,
   Switch,
   Text,
@@ -12,14 +15,34 @@ import { useTheme } from "../context/ThemeContext"; // adjust path if your setti
 
 export default function SettingsScreen() {
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [confirmReset, setConfirmReset] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
+  const [showResetConfirm, setShowResetConfirm] = useState(false);
+  const [updateStatus, setUpdateStatus] = useState("");
+  const [checking, setChecking] = useState(false);
+
+  const checkForUpdates = async () => {
+    if (checking) return;
+    try {
+      setChecking(true);
+      setUpdateStatus("Checking for updates...");
+      const check = await Updates.checkForUpdateAsync();
+      if (check.isAvailable) {
+        setUpdateStatus("Downloading update...");
+        await Updates.fetchUpdateAsync();
+        setUpdateStatus("Update ready — restarting...");
+        await Updates.reloadAsync();
+      } else {
+        setUpdateStatus("You're up to date ✓");
+      }
+    } catch {
+      setUpdateStatus("Couldn't check for updates. Try again later.");
+    } finally {
+      setChecking(false);
+    }
+  };
 
   const resetProgress = async () => {
-    if (!confirmReset) {
-      setConfirmReset(true);
-      return;
-    }
+    setShowResetConfirm(false);
     const d = new Date();
     const todayQuest = `tt_quests_${d.getFullYear()}-${d.getMonth() + 1}-${d.getDate()}`;
     await Promise.all([
@@ -30,7 +53,6 @@ export default function SettingsScreen() {
       AsyncStorage.removeItem("tt_confetti"),
     ]);
     // also clear WebView-local quest/xp caches so screens re-sync
-    setConfirmReset(false);
     setResetMsg("Progress reset — fresh start! 🌱");
   };
 
@@ -53,26 +75,87 @@ export default function SettingsScreen() {
       </View>
 
       <View style={[styles.cardColumn, cardStyle]}>
+        <Text style={[styles.label, labelColor]}>App Updates</Text>
+        {Updates.isEnabled ? (
+          <>
+            <Text style={[styles.helper, subColor]}>
+              Channel: {Updates.channel ?? "—"} •{" "}
+              {Updates.updateId
+                ? `Update ${Updates.updateId.slice(0, 8)}`
+                : "Built-in version"}
+            </Text>
+            <TouchableOpacity
+              style={[styles.updateButton, checking && styles.updateBusy]}
+              onPress={checkForUpdates}
+              disabled={checking}
+            >
+              <Text style={styles.updateButtonText}>
+                {checking ? "Working..." : "Check for updates"}
+              </Text>
+            </TouchableOpacity>
+            {updateStatus ? (
+              <Text style={[styles.status, subColor]}>{updateStatus}</Text>
+            ) : null}
+          </>
+        ) : (
+          <Text style={[styles.helper, subColor]}>
+            Updates aren&apos;t available in this build — reinstall the latest version
+            to enable them.
+          </Text>
+        )}
+      </View>
+
+      <View style={[styles.cardColumn, cardStyle]}>
         <Text style={[styles.label, labelColor]}>Reset Progress</Text>
         <Text style={[styles.helper, subColor]}>
-          Clears XP, streak, completed lessons, and today's quests. Your name,
+          Clears XP, streak, completed lessons, and today&apos;s quests. Your name,
           avatar, and color are kept.
         </Text>
         <TouchableOpacity
-          style={[styles.resetButton, confirmReset && styles.resetArmed]}
-          onPress={resetProgress}
+          style={styles.resetButton}
+          onPress={() => setShowResetConfirm(true)}
         >
-          <Text style={styles.resetButtonText}>
-            {confirmReset ? "Tap again to confirm reset" : "Reset all progress"}
-          </Text>
+          <Text style={styles.resetButtonText}>Reset all progress</Text>
         </TouchableOpacity>
         {resetMsg ? <Text style={[styles.status, subColor]}>{resetMsg}</Text> : null}
       </View>
 
+      <Modal
+        visible={showResetConfirm}
+        transparent
+        animationType="fade"
+        onRequestClose={() => setShowResetConfirm(false)}
+      >
+        <View style={styles.modalOverlay}>
+          <View style={[styles.modalCard, cardStyle]}>
+            <Text style={[styles.label, labelColor]}>Are you sure?</Text>
+            <Text style={[styles.helper, subColor]}>
+              This will erase all XP, streaks, completed lessons, and today&apos;s
+              quests. Your name, avatar, and color are kept. This can&apos;t be
+              undone.
+            </Text>
+            <View style={styles.buttonRow}>
+              <TouchableOpacity
+                style={styles.cancelButton}
+                onPress={() => setShowResetConfirm(false)}
+              >
+                <Text style={styles.cancelButtonText}>Cancel</Text>
+              </TouchableOpacity>
+              <TouchableOpacity
+                style={styles.confirmButton}
+                onPress={resetProgress}
+              >
+                <Text style={styles.confirmButtonText}>Yes, reset</Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </View>
+      </Modal>
+
       <View style={[styles.card, cardStyle]}>
         <View>
           <Text style={[styles.label, labelColor]}>🎺 Trumpet Tutor</Text>
-          <Text style={[styles.helper, subColor]}>Version 1.0.0 — made for young players.</Text>
+          <Text style={[styles.helper, subColor]}>Version {Constants.expoConfig?.version ?? "1.0.0"} — made for young players.</Text>
         </View>
       </View>
     </SafeAreaView>
@@ -133,4 +216,37 @@ const styles = StyleSheet.create({
   },
   resetArmed: { backgroundColor: "#991B1B" },
   resetButtonText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
+  updateButton: {
+    backgroundColor: "#A78BFA",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+    marginTop: 4,
+  },
+  updateBusy: { opacity: 0.6 },
+  updateButtonText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
+  modalOverlay: {
+    flex: 1,
+    backgroundColor: "rgba(0,0,0,0.6)",
+    justifyContent: "center",
+    alignItems: "center",
+    padding: 24,
+  },
+  modalCard: { borderRadius: 16, padding: 22, width: "100%", elevation: 5 },
+  cancelButton: {
+    flex: 1,
+    backgroundColor: "rgba(148,163,184,0.25)",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  cancelButtonText: { fontWeight: "800", fontSize: 14, color: "#94A3B8" },
+  confirmButton: {
+    flex: 1,
+    backgroundColor: "#EF4444",
+    paddingVertical: 12,
+    borderRadius: 10,
+    alignItems: "center",
+  },
+  confirmButtonText: { color: "#FFFFFF", fontWeight: "800", fontSize: 14 },
 });

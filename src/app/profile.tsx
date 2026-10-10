@@ -158,7 +158,7 @@ const ALL_TROPHIES = [
     id: "24",
     name: "Gear Head",
     emoji: "🔧",
-    desc: "Explore all entries in the Fingering Guide.",
+    desc: "Explore all entries in Finger placement and notes.",
   },
   {
     id: "25",
