@@ -8,8 +8,7 @@
  * Leave COACH_PROXY_URL empty to fall back to the on-device Gemini key
  * (Settings → AI Coach API Key).
  */
-export const COACH_PROXY_URL =
-  "https://trumpet-coach-proxy.jesse030117.workers.dev";
+export const COACH_PROXY_URL = "";
 
 /** Optional shared secret — must match the worker's PROXY_KEY secret, if set. */
 export const COACH_PROXY_KEY = "";

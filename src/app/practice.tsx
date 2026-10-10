@@ -1,6 +1,5 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { useFocusEffect } from "expo-router";
-import * as SecureStore from "expo-secure-store";
 import { useCallback, useMemo, useRef, useState } from "react";
 import { PermissionsAndroid, Platform, StyleSheet, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
@@ -9,16 +8,6 @@ import { useTheme } from "../context/ThemeContext";
 import { awardXP, getStoredXP } from "../constants/xp";
 import { COACH_PROXY_KEY, COACH_PROXY_URL } from "../constants/coach";
 
-const API_KEY_STORAGE_KEY = "gemini_api_key";
-const GEMINI_MODEL = "gemini-flash-latest";
-const GEMINI_API_URL = `https://generativelanguage.googleapis.com/v1beta/models/${GEMINI_MODEL}:generateContent`;
-
-const COACH_SYSTEM_PROMPT = `You are a friendly expert trumpet tutor inside the Trumpet Tutor practice app.
-Answer questions about trumpet technique (embouchure, breathing, tonguing, articulation),
-valve combinations and fingerings, practice routines, trumpet maintenance, and music
-theory for trumpet players. Keep answers short (2-4 sentences), encouraging, and
-practical. If asked about something unrelated to trumpet or music, briefly redirect
-the conversation back to trumpet topics.`;
 
 const FINGERING_CHART = [
   {
@@ -106,7 +95,6 @@ export default function App() {
   const [targetValves, setTargetValves] = useState("");
   const [targetExec, setTargetExec] = useState("");
   const webViewRef = useRef<WebView | null>(null);
-  const apiKeyRef = useRef<string | null>(null);
   const { isDarkMode } = useTheme();
   const [nativeXp, setNativeXp] = useState(0);
 
@@ -128,7 +116,6 @@ export default function App() {
         if (savedValves) setTargetValves(savedValves);
         if (savedExec) setTargetExec(savedExec);
 
-        apiKeyRef.current = await SecureStore.getItemAsync(API_KEY_STORAGE_KEY);
         setNativeXp(await getStoredXP());
       }
       requestPermissionsAndLoad();
@@ -172,42 +159,8 @@ export default function App() {
         return;
       }
 
-      // Fallback: direct Gemini call with the on-device key
-      const key = apiKeyRef.current;
-      if (!key) {
-        injectAiMessage(
-          "Add your Gemini API key in Settings → AI Coach to enable the chat.",
-        );
-        return;
-      }
-      try {
-        const res = await fetch(
-          `${GEMINI_API_URL}?key=${encodeURIComponent(key)}`,
-          {
-            method: "POST",
-            headers: { "Content-Type": "application/json" },
-            body: JSON.stringify({
-              systemInstruction: { parts: [{ text: COACH_SYSTEM_PROMPT }] },
-              contents: [{ role: "user", parts: [{ text: userText }] }],
-              generationConfig: { maxOutputTokens: 400, temperature: 0.7 },
-            }),
-          },
-        );
-        if (!res.ok) throw new Error(`Gemini API returned ${res.status}`);
-        const data = await res.json();
-        const parts = data?.candidates?.[0]?.content?.parts;
-        const reply =
-          Array.isArray(parts) && parts.length > 0
-            ? parts.map((p: { text?: string }) => p.text ?? "").join("")
-            : "";
-        injectAiMessage(
-          reply.trim() || "Hmm, I didn't catch that — try asking again.",
-        );
-      } catch {
-        injectAiMessage(
-          "Couldn't reach the AI coach. Check your API key in Settings and your connection.",
-        );
-      }
+      // No proxy configured — the coach needs the family server set up.
+      injectAiMessage("The AI coach isn't connected yet.");
     },
     [injectAiMessage],
   );

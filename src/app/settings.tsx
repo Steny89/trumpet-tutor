@@ -1,50 +1,19 @@
 import AsyncStorage from "@react-native-async-storage/async-storage";
-import * as SecureStore from "expo-secure-store";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   StyleSheet,
   Switch,
   Text,
-  TextInput,
   TouchableOpacity,
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { useTheme } from "../context/ThemeContext"; // adjust path if your settings file is located elsewhere in src/app/
 
-const API_KEY_STORAGE_KEY = "gemini_api_key";
-
 export default function SettingsScreen() {
   const { isDarkMode, toggleDarkMode } = useTheme();
-  const [apiKey, setApiKey] = useState("");
-  const [hasKey, setHasKey] = useState(false);
-  const [status, setStatus] = useState("");
   const [confirmReset, setConfirmReset] = useState(false);
   const [resetMsg, setResetMsg] = useState("");
-
-  useEffect(() => {
-    SecureStore.getItemAsync(API_KEY_STORAGE_KEY).then((saved) => {
-      setHasKey(!!saved);
-    });
-  }, []);
-
-  const saveKey = async () => {
-    const trimmed = apiKey.trim();
-    if (!trimmed) {
-      setStatus("Paste a key first.");
-      return;
-    }
-    await SecureStore.setItemAsync(API_KEY_STORAGE_KEY, trimmed);
-    setApiKey("");
-    setHasKey(true);
-    setStatus("Key saved securely on this device.");
-  };
-
-  const clearKey = async () => {
-    await SecureStore.deleteItemAsync(API_KEY_STORAGE_KEY);
-    setHasKey(false);
-    setStatus("Key removed.");
-  };
 
   const resetProgress = async () => {
     if (!confirmReset) {
@@ -81,50 +50,6 @@ export default function SettingsScreen() {
       <View style={[styles.card, cardStyle]}>
         <Text style={[styles.label, labelColor]}>Dark Mode</Text>
         <Switch value={isDarkMode} onValueChange={toggleDarkMode} />
-      </View>
-
-      <View style={[styles.cardColumn, cardStyle]}>
-        <Text style={[styles.label, labelColor]}>AI Coach API Key</Text>
-        <Text style={[styles.helper, subColor]}>
-          Paste your free Gemini API key to enable the AI Practice Coach. Get
-          one at aistudio.google.com/apikey — it stays encrypted on this
-          device and is never sent anywhere except Google's API. If a key is
-          ever shared or exposed, rotate it in AI Studio and paste the new one
-          here.
-        </Text>
-        <TextInput
-          style={[
-            styles.input,
-            {
-              borderColor: isDarkMode ? "#3A3A3C" : "#CBD5E1",
-              backgroundColor: isDarkMode ? "#130E20" : "#F8FAFC",
-              color: isDarkMode ? "#FFFFFF" : "#2C3E50",
-            },
-          ]}
-          value={apiKey}
-          onChangeText={(t) => {
-            setApiKey(t);
-            setStatus("");
-          }}
-          placeholder={
-            hasKey ? "Key saved ✓ — paste a new one to replace" : "Paste API key here"
-          }
-          placeholderTextColor={isDarkMode ? "#6B7280" : "#A79BD0"}
-          secureTextEntry
-          autoCapitalize="none"
-          autoCorrect={false}
-        />
-        <View style={styles.buttonRow}>
-          <TouchableOpacity style={styles.saveButton} onPress={saveKey}>
-            <Text style={styles.saveButtonText}>Save Key</Text>
-          </TouchableOpacity>
-          {hasKey && (
-            <TouchableOpacity style={styles.clearButton} onPress={clearKey}>
-              <Text style={styles.clearButtonText}>Remove</Text>
-            </TouchableOpacity>
-          )}
-        </View>
-        {status ? <Text style={[styles.status, subColor]}>{status}</Text> : null}
       </View>
 
       <View style={[styles.cardColumn, cardStyle]}>

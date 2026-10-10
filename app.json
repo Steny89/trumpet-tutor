@@ -21,6 +21,8 @@
       "package": "com.jstenstrom.trumpettutor",
       "permissions": [
         "RECORD_AUDIO",
+        "MODIFY_AUDIO_SETTINGS",
+        "RECORD_AUDIO",
         "MODIFY_AUDIO_SETTINGS"
       ]
     },
@@ -49,6 +51,12 @@
       "eas": {
         "projectId": "f5f9655f-103a-4626-ae79-fe9e1810abca"
       }
+    },
+    "runtimeVersion": {
+      "policy": "appVersion"
+    },
+    "updates": {
+      "url": "https://u.expo.dev/f5f9655f-103a-4626-ae79-fe9e1810abca"
     }
   }
 }
