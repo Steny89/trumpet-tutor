@@ -5,10 +5,11 @@
  * URL here. The app then talks to your proxy, which holds the Gemini API key
  * server-side — no key needed on any phone.
  *
- * Leave COACH_PROXY_URL empty to fall back to the on-device Gemini key
- * (Settings → AI Coach API Key).
+ * If empty, the coach reports it isn't connected (Settings → App Updates
+ * can verify the build, but the proxy URL must be set for the coach).
  */
-export const COACH_PROXY_URL = "";
+export const COACH_PROXY_URL =
+  "https://trumpet-coach-proxy.jesse030117.workers.dev";
 
 /** Optional shared secret — must match the worker's PROXY_KEY secret, if set. */
 export const COACH_PROXY_KEY = "";

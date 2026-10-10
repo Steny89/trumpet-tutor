@@ -126,9 +126,11 @@ function TabLayout() {
 const styles = StyleSheet.create({
   iconPill: {
     borderRadius: 16,
-    paddingHorizontal: 18,
-    paddingVertical: 8,
+    paddingHorizontal: 13,
+    paddingVertical: 6,
     backgroundColor: "transparent",
+    alignItems: "center",
+    justifyContent: "center",
   },
   iconPillActive: {
     backgroundColor: "rgba(167, 139, 250, 0.22)",
