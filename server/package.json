@@ -1,0 +1,1 @@
+{"description":"Cloudflare Worker proxy for the Trumpet Tutor AI coach (keeps the Gemini API key server-side).","name":"trumpet-coach-proxy","private":true,"version":"1.0.0"}
