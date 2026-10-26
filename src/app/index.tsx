@@ -49,6 +49,29 @@ const JOKES = [
   "What kind of music do balloons hate? Pop music!",
   "Why is the trumpet the funniest brass instrument? It always delivers the punch-line!",
   "What do you call twelve trumpets in a row? A brass bandwagon!",
+  "Why don't eggs tell jokes? They'd crack each other up!",
+  "What do you call cheese that isn't yours? Nacho cheese!",
+  "Why did the scarecrow win an award? He was outstanding in his field!",
+  "What do you call a fish with no eyes? A fsh!",
+  "Why did the bicycle fall over? It was two-tired!",
+  "What did the ocean say to the beach? Nothing — it just waved!",
+  "Why don't scientists trust atoms? Because they make up everything!",
+  "What do you call a sleeping bull? A bulldozer!",
+  "Why did the math book look so sad? It had too many problems!",
+  "What do you call a factory that makes okay products? A satisfactory!",
+  "Why did the cookie go to the doctor? It was feeling crumby!",
+  "How does a penguin build its house? Igloos it together!",
+  "Why are golden retrievers such good friends? They're always retrieving your spirits!",
+  "Why did the golden retriever sit in the shade? He didn't want to be a hot dog!",
+  "Why are golden retrievers terrible at poker? Their tail gives away every good hand!",
+  "Why did the golden retriever become a lifeguard? He was already in the water anyway!",
+  "What's a golden retriever's favorite game? Fetch — it's not a game, it's a lifestyle!",
+  "Why do golden retrievers smile so much? Every stick is the best stick they've ever seen!",
+  "What do golden retrievers say after a great joke? That one's golden!",
+  "What do you call a golden retriever with a map? Still lost — but having the best time ever!",
+  "Why did the golden retriever bring a towel to the park? Just in case there was a pool party!",
+  "What's golden, fluffy, and comes back every time you throw it? A golden retriever with a tennis ball!",
+  "Why don't golden retrievers ever get in trouble? Nobody can stay mad at that face!",
 ];
 
 const TIPS = [
@@ -141,6 +164,8 @@ export default function HomeScreen() {
         .actions { display: flex; gap: 8px; }
         .abtn { flex: 1; padding: 14px 6px; border-radius: 12px; border: none; font-size: 13px; font-weight: 800; color: #fff; background: ${accent}; cursor: pointer; box-shadow: 0 3px 8px rgba(0,0,0,0.15); }
         .abtn.alt { background: ${inputBg}; color: ${textCol}; border: 1px solid ${borderCol}; box-shadow: none; }
+        .jokebtn { margin-top: 10px; padding: 9px 16px; border-radius: 10px; border: 1px solid ${borderCol}; background: ${inputBg}; color: ${textCol}; font-size: 12px; font-weight: 800; cursor: pointer; -webkit-tap-highlight-color: transparent; transition: transform 0.12s ease, filter 0.12s ease; }
+        .jokebtn:active { transform: scale(0.93); filter: brightness(1.15); }
         @keyframes riseIn { from { opacity: 0; transform: translateY(20px) scale(0.97); } to { opacity: 1; transform: none; } }
         @keyframes heroShift { 0% { background-position: 0% 50%; } 50% { background-position: 100% 50%; } 100% { background-position: 0% 50%; } }
         @keyframes popIn { 0% { opacity: 0; transform: scale(0.85); } 60% { transform: scale(1.03); } 100% { opacity: 1; transform: scale(1); } }
@@ -191,6 +216,7 @@ export default function HomeScreen() {
       <div class="card">
         <div class="card-title">😂 Dad joke of the day</div>
         <div class="daily"><span class="daily-emoji">🤣</span><span id="jokeLine"></span></div>
+        <button class="jokebtn" onclick="newJoke()">🎲 New joke</button>
       </div>
 
       <div class="actions">
@@ -233,6 +259,18 @@ export default function HomeScreen() {
 
         function go(route) {
           window.ReactNativeWebView.postMessage(JSON.stringify({ type: 'nav', route: route }));
+        }
+
+        var jokeIdx = -1;
+        function showJoke() {
+          document.getElementById('jokeLine').innerText = JOKES[jokeIdx];
+        }
+        function newJoke() {
+          if (JOKES.length < 2) return;
+          var next = jokeIdx;
+          while (next === jokeIdx) next = Math.floor(Math.random() * JOKES.length);
+          jokeIdx = next;
+          showJoke();
         }
 
         function confettiBurst() {
@@ -282,7 +320,8 @@ export default function HomeScreen() {
           document.getElementById('greetWord').innerText = greet;
           document.getElementById('inspireLine').innerText = pickRandom(INSPIRE);
           document.getElementById('tipLine').innerText = pickDaily(TIPS);
-          document.getElementById('jokeLine').innerText = pickRandom(JOKES);
+          jokeIdx = Math.floor(Math.random() * JOKES.length);
+          showJoke();
 
           var xp = NATIVE_XP;
           var lvl = Math.floor(xp / 500) + 1;
