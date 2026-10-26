@@ -13,7 +13,7 @@
  * If PROXY_KEY is set, callers must send header: x-proxy-key: <value>
  */
 
-const MODEL = "gemini-flash-latest";
+const MODEL = "gemini-3.6-flash";
 
 const SYSTEM_PROMPT = `You are a friendly expert trumpet tutor inside the Trumpet Tutor practice app.
 Answer questions about trumpet technique (embouchure, breathing, tonguing, articulation),
